@@ -1,6 +1,16 @@
+import { useEffect } from "react"
+
 export const Square = () => {
-    return (
-        <div className="w-52 h-52 bg-orange-700 text-white">
+    useEffect(() => {
+        window.addEventListener('Scroll', () => { } );
+
+        return () => {
+            window.removeEventListener('scroll', () => { } );
+        }
+    });
+    
+    return (       
+        <div className="w-40 h-40 bg-red-400 text-white">
         </div>
     );
 }

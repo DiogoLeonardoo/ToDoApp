@@ -4,65 +4,104 @@
 import { photoList } from "@/data/photoList";
 import { PhotoItem } from "./components/PhotoItem";
 import { Modal } from "./components/Modal";
-import { useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { questions } from "@/data/questions";
 import { QuestionItem } from "./components/QuestionItem";
 import { Results } from "./components/Results";
+import { VideoPlayer } from "./components/VideoPlayer";
+import { Square } from "./components/Square";
+import { Item } from "@/types/Item";
+import { listReducer } from "@/reducers/listReducer";
 
 
 const Page = () => {
-  const title = 'Quiz da minha lalinha 🖤 '
-  const [answers, setAnswers] = useState<number[]>([]);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [showResult, setShowResult]  = useState(false);
+  const [list, dispatch] = useReducer(listReducer, []);
+  const [addField, setAddField] = useState(' ');
+  
+  const handleAddButton = () => {
 
-  const loadNextQuestion = () => {
-    if(questions[currentQuestion + 1]) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setShowResult(true);
-    }
-  }
+    if(addField.trim() === '') return false;
+      
+      dispatch({
+        type: 'add',
+        payload: {
+          text: addField.trim()
+        }
+      })
 
- const handleAnswered = (answer: number) => {
-    setAnswers([... answers, answer]);
-    loadNextQuestion();
- }
+      setAddField('');
+    };
 
- const handleRestartButton = () => {
-  setAnswers([]);
-  setCurrentQuestion(0);
-  setShowResult(false);
- }
+    const handleDoneCheckbox = (id: number) => {
+
+      dispatch({
+        type: 'toggleDone',
+        payload: { id }
+      });
+    };
+
+    const handleEdit = (id:number) => {
+      const item = list.find(it => it.id === id);
+      if(!item)return false;
+      
+        const newText = window.prompt('Editar Tarefa', item.text);
+        if(!newText || newText?.trim() === '') return false;
+
+        dispatch({
+          type: 'editText',
+          payload: { id, newText }
+        });
+      }
+
+      const handleRemove = (id:number) => {
+        if (!window.confirm('Tem certeza que deseja excluir?')) return false;
+        dispatch({
+          type: 'remove',
+          payload: {id}
+        })
+
+      }
+  
   
   return (
-    <div className='w-full h-screen flex justify-center items-center bg-blue-600'>
-      <div className="w-full max-w-xl rounded-md bg-white text-black shadow shadow-black">
-        <div className="p-5 font-bold text-2xl border-t border-gray-300">{title}</div>
-        <div className="border-t border-gray-300 my-4"></div>
-        <div className="p-5">
+    <div className="container mx-auto">
+      <h1 className="text-center text-4xl pt-4">Lista de Tarefas</h1>
+      <div className="rounded-md max-w-2xl mx-auto flex bg-gray-900 border border-gray-400 p-4 my-4">
 
-          {!showResult &&
-          <QuestionItem
-              question={questions[currentQuestion]}
-              count={currentQuestion + 1}
-              onAnswer={handleAnswered}></QuestionItem>
-          }
-            {showResult && 
-                <Results questions={questions} answers={answers} />
-            }
-        </div>
-        <div className="p-5 text-center border-t border-gray-300">
-          {!showResult &&
-          `${currentQuestion + 1} de ${questions.length} pergunta${questions.length === 1 ? '' : 's'}`
-          }
-          <div className="border-t border-gray-300 my-4"></div>
-          {showResult &&
-          <button onClick={handleRestartButton} className="px-3 py-2 rounded-md bg-blue-800 text-white">Reiniciar Quiz</button>}
+        <input 
+        type="text" 
+        className="rounded-md flex-1 border border-white p-3 bg-transparent text-white outline-none"
+        placeholder="Digite um item"
+        value={addField}
+        onChange={e => setAddField(e.target.value)} />
+        
+        <button 
+        className="p-4 font-bold"
+        onClick={handleAddButton}
+        >ADICIONAR  </button>
+      </div>
+
+      <ul className="max-w-2xl mx-auto">
+        {list.map(item => ( 
+          <li 
+          key={item.id}
+          className="flex items-center p-3 my-3 border-gray-700 border-b">
           
-        </div>
+          <input 
+          type="checkbox"
+          className="w-6 h-6 mr-4"
+          checked={item.done}
+          onChange={() => handleDoneCheckbox(item.id)}
+          />
+          <p className="flex-1 text-lg">{item.text}</p>
+          <button onClick={() => handleEdit(item.id)} className="mx-4 text-white hover:text-gray-500">Editar</button>
+          <button onClick={() => handleRemove(item.id)} className="mx-4 text-white hover:text-gray-500">Excluir</button>
+          </li>
+
+        ))}
+      </ul>
     </div>
-    </div>
+   
   );
 }
 
