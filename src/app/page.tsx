@@ -8,7 +8,6 @@ import { useEffect, useReducer, useState } from "react";
 import { questions } from "@/data/questions";
 import { QuestionItem } from "./components/QuestionItem";
 import { Results } from "./components/Results";
-import { VideoPlayer } from "./components/VideoPlayer";
 import { Square } from "./components/Square";
 import { Item } from "@/types/Item";
 import { listReducer } from "@/reducers/listReducer";
